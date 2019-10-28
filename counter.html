@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>A plastic counter</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script sync src="https://platform.twitter.com/widgets.js"></script>
+    <style>
+      html {
+        font-family: Roboto, sans-serif;
+        font-size: 22px;
+      }
+
+      .wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 100vh;
+      }
+
+      #counter {
+        justify-self: center;
+        align-self: center;
+        font-size: 1.5rem;
+      }
+
+      .tweets-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-gap: 40px;
+        margin-left: 5%;
+        margin-right: 5%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <span id="counter"></span>
+    </div>
+    <div class="tweets-wrapper"></div>
+    <script src="counter_script.js"></script>
+    <script src="tweet_script.js"></script>
+  </body>
+</html>
