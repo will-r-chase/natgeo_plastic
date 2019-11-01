@@ -26,7 +26,7 @@ mediterranean <-
 
 all_oceans <- 
   rbind(atlantic, pacific, indian, mediterranean) %>%
-  mutate(percent_sand = (mismanaged_plastic_kg_day / 60585326) * 100,
+  mutate(percent_sand = (mismanaged_plastic_kg_day / 68158491) * 100,
          percent_water = 100 - percent_sand,
          mismanaged_plastic_kg_sec = mismanaged_plastic_kg_day / 86400,
          anim_interval_sec = 1000 / mismanaged_plastic_kg_sec) %>%

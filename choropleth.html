@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link
       href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
       rel="stylesheet"
@@ -12,29 +12,153 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <title>Map Plastic</title>
     <style>
-        div.tooltip {	
-            font-family: "Roboto", sans-serif;
-            position: absolute;			
-            text-align: left;			
-            padding: 0.5em;				
-            font: 0.8em;		
-            background: rgb(255, 255, 255);	
-            border: 1px solid rgba(0, 0, 0, 0.4);		
-            border-radius: 0.5em;			
-            pointer-events: none;	
-            }
-        
-        /* .land:hover {
+      div.tooltip {
+        font-family: "Roboto", sans-serif;
+        position: absolute;
+        text-align: left;
+        padding: 0.5em;
+        font: 0.8em;
+        background: rgb(255, 255, 255);
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        border-radius: 0.5em;
+        pointer-events: none;
+      }
+
+      /* .land:hover {
             cursor: pointer;
         } */
+      .water {
+        width: 850px;
+        height: 450px;
+        background: radial-gradient(
+          circle,
+          rgba(143, 225, 213, 1) 0%,
+          rgba(40, 183, 189, 1) 100%
+        );
+      }
     </style>
-</head>
-<body>
-    <script src="choropleth.js"></script>
-    <svg version="1.1"
-     baseProfile="full"
-     width="800" height="400"
-     xmlns="http://www.w3.org/2000/svg">
-    </svg>
-</body>
+  </head>
+  <body>
+    <div class="water">
+      <svg
+        id = "mapSVG"
+        version="1.1"
+        baseProfile="full"
+        width="800"
+        height="400"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+    </div>
+    <script>
+      const width = 800;
+      const height = 400;
+
+      let line = d3
+        .line()
+        .x(d => d[0])
+        .y(d => d[1])
+        .curve(d3.curveBasisClosed);
+
+      let projection = d3
+        .geoEqualEarth()
+        .fitExtent([[0, 0], [width, height]], { type: "Sphere" })
+        .precision(0.1);
+
+      let path = d3.geoPath().projection(projection);
+
+      let color = d3
+        .scaleQuantile()
+        .domain([0, 0.05])
+        .range([
+          "#fbf6ee",
+          "#f7eddd",
+          "#f3e5cd",
+          "#f0dcbc",
+          "#ecd4ac",
+          "#e8cb9b",
+          "#e5c28a",
+          "#e1ba7a",
+          "#ddb169",
+          "#daa959"
+        ])
+        .unknown("#ccc");
+
+      function round(x) {
+        let my_path = path(x).split("M");
+        my_path.shift();
+
+        let land_rounded = [];
+        my_path.forEach(d => {
+          land_rounded.push(
+            d
+              .replace(/Z/, "")
+              .split("L")
+              .map(p => p.split(","))
+          );
+        });
+
+        let curves = [];
+        let curve_path = land_rounded.forEach(d => {
+          curves.push(line(d));
+        });
+
+        return curves;
+      }
+
+      let tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute");
+
+      d3.json("plastic_map.topojson").then(function(data) {
+        const ms_countries = topojson.feature(data, data.objects.foo);
+        console.log(ms_countries.features);
+
+        const svg = d3.select("#mapSVG");
+
+        const g = svg.append("g");
+
+        g.selectAll(".land")
+          .data(ms_countries.features)
+          .join("path")
+          .attr("fill", d => color(d.properties.plastic))
+          .attr("d", round)
+          .attr("class", "land")
+          .attr("stroke", "black")
+          .attr("stroke-opacity", 0)
+          .on("mouseover", function(d) {
+            tooltip
+              .transition()
+              .duration(250)
+              .style("opacity", 1);
+            tooltip
+              .html(
+                `
+        Country: ${d.properties.ADMIN} </br>
+        Mismanaged plastic for country (tonnes/year): ${d.properties.plastic_country_tonnes} </br>
+        Mismanaged plastic per person (kg/year): ${d.properties.plastic_kg_person_year} 
+        `
+              )
+              .style("left", d3.event.pageX + 28 + "px")
+              .style("top", d3.event.pageY - 28 + "px");
+          })
+          .on("mouseout", function(d) {
+            tooltip
+              .transition()
+              .duration(250)
+              .style("opacity", 0);
+          });
+
+        g.append("path")
+          .datum(topojson.mesh(data, data.objects.foo, (a, b) => a !== b))
+          .attr("fill", "none")
+          .attr("stroke", "white")
+          .attr("stroke-linejoin", "round")
+          .attr("d", path)
+          .attr("stroke-opacity", 1);
+      });
+    </script>
+  </body>
 </html>

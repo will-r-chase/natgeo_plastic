@@ -17,7 +17,7 @@ let path = d3.geoPath().projection(projection);
 let color = d3
   .scaleQuantile()
   .domain([0, 0.05])
-  .range(d3.schemeBlues[9])
+  .range(["#fbf6ee", "#f7eddd", "#f3e5cd", "#f0dcbc", "#ecd4ac", "#e8cb9b", "#e5c28a", "#e1ba7a", "#ddb169", "#daa959"])
   .unknown("#ccc");
 
 function round(x) {
@@ -74,7 +74,8 @@ d3.json("plastic_map.topojson").then(function(data) {
         .html(
           `
         Country: ${d.properties.ADMIN} </br>
-        Mismanaged plastic (kg/person/day): ${d.properties.plastic}
+        Mismanaged plastic for country (tonnes/year): ${d.properties.plastic_country_tonnes} </br>
+        Mismanaged plastic per person (kg/year): ${d.properties.plastic_kg_person_year} 
         `
         )
         .style("left", d3.event.pageX + 28 + "px")

@@ -11,9 +11,10 @@ glimpse(data)
 
 data_sort <- 
   data %>%
-  select(country, mismanaged_plastic_waste_kg_person_day_7) %>%
+  select(country, mismanaged_plastic_waste_kg_person_day_7, mismanaged_plastic_waste_in_2010_tonnes_7) %>%
   filter(!is.na(country)) %>%
   mutate(mismanaged_plastic_waste_kg_person_day_7 = parse_number(mismanaged_plastic_waste_kg_person_day_7),
+         mismanaged_plastic_waste_kg_person_year = mismanaged_plastic_waste_kg_person_day_7 * 365,
          country = str_remove(country, "8")) %>%
   arrange(desc(mismanaged_plastic_waste_kg_person_day_7))
 
